@@ -6,6 +6,8 @@ import com.spring.jwt.cart.entity.CartEntity;
 import com.spring.jwt.entity.User;
 import com.spring.jwt.premiumCar.PremiumCar;
 
+import java.time.LocalDateTime;
+
 public class CartMapper {
 
     private CartMapper() {
@@ -13,17 +15,15 @@ public class CartMapper {
     }
 
     // DTO → Entity
-    public static CartEntity toEntity(
-            CartRequestDTO dto,
-            User user,
-            PremiumCar premiumCar
-    ) {
-        return CartEntity.builder()
-                .user(user)
-                .premiumCar(premiumCar)
-                .quantity(dto.getQuantity())
-                .active(true)
-                .build();
+
+    // Map CartRequestDTO -> CartEntity
+    public static CartEntity toEntity(CartRequestDTO dto, User user, PremiumCar premiumCar) {
+        CartEntity entity = new CartEntity();
+        entity.setUser(user);
+        entity.setPremiumCar(premiumCar);
+        entity.setQuantity(dto.getQuantity());
+        entity.setCreatedAt(LocalDateTime.now());
+        return entity;
     }
 
     // Entity → DTO
@@ -34,16 +34,14 @@ public class CartMapper {
         return CartResponseDTO.builder()
                 .cartId(entity.getId())
                 .userId(Long.valueOf(entity.getUser().getId()))
-                .premiumCarId(car.getPremiumCarId().longValue()) // ✅ FIX
-                .premiumCarName(
-                        car.getBrand() + " " + car.getModel()     // ✅ FIX
-                )
-                .price(car.getPrice().doubleValue())             // ✅ FIX
+                .premiumCarId(car.getPremiumCarId().longValue())
+                .premiumCarName(car.getBrand() + " " + car.getModel())
+                .price(car.getPrice().doubleValue())
                 .quantity(entity.getQuantity())
-                .totalPrice(
-                        (double) (car.getPrice() * entity.getQuantity())
-                )
+                .totalPrice((double) (car.getPrice() * entity.getQuantity()))
                 .createdAt(entity.getCreatedAt())
                 .build();
     }
+
+
 }

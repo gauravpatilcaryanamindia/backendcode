@@ -1,5 +1,6 @@
 package com.spring.jwt.cart.serviceImpl;
 
+
 import com.spring.jwt.cart.dto.CartRequestDTO;
 import com.spring.jwt.cart.dto.CartResponseDTO;
 import com.spring.jwt.cart.dto.CartUpdateDTO;
@@ -8,6 +9,7 @@ import com.spring.jwt.cart.mapper.CartMapper;
 import com.spring.jwt.cart.repository.CartRepository;
 import com.spring.jwt.cart.service.CartService;
 import com.spring.jwt.entity.User;
+import com.spring.jwt.exception.ResourceNotFoundException;
 import com.spring.jwt.premiumCar.PremiumCar;
 import com.spring.jwt.premiumCar.PremiumCarRepository;
 import com.spring.jwt.repository.UserRepository;
@@ -27,15 +29,15 @@ public class CartServiceImpl implements CartService {
     private final UserRepository userRepository;
     private final PremiumCarRepository premiumCarRepository;
 
-    // ✅ ADD TO CART
+
     @Override
     public CartResponseDTO addToCart(Integer userId, CartRequestDTO dto) {
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
 
         PremiumCar premiumCar = premiumCarRepository.findById(dto.getPremiumCarId().intValue())
-                .orElseThrow(() -> new RuntimeException("Premium car not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Premium car not found with ID: " + dto.getPremiumCarId()));
 
         CartEntity cartEntity = cartRepository
                 .findByUserAndPremiumCar(user, premiumCar)
@@ -43,45 +45,48 @@ public class CartServiceImpl implements CartService {
                     existing.setQuantity(existing.getQuantity() + dto.getQuantity());
                     return existing;
                 })
-                .orElseGet(() ->
-                        CartMapper.toEntity(dto, user, premiumCar)
-                );
+                .orElseGet(() -> CartMapper.toEntity(dto, user, premiumCar));
 
-        CartEntity saved = cartRepository.save(cartEntity);
-        return CartMapper.toResponseDTO(saved);
+        CartEntity savedCart = cartRepository.save(cartEntity);
+
+        return CartMapper.toResponseDTO(savedCart);
+
+
+
     }
 
-    // ✅ UPDATE CART
     @Override
     public CartResponseDTO updateCart(CartUpdateDTO dto) {
 
         CartEntity cart = cartRepository.findById(dto.getCartId())
-                .orElseThrow(() -> new RuntimeException("Cart item not found"));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Cart item not found with ID: " + dto.getCartId()));
 
         cart.setQuantity(dto.getQuantity());
-
         return CartMapper.toResponseDTO(cartRepository.save(cart));
     }
 
-    // ✅ REMOVE FROM CART
+
     @Override
     public void removeFromCart(Integer userId, Long premiumCarId) {
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("User not found with ID: " + userId));
 
         PremiumCar premiumCar = premiumCarRepository.findById(premiumCarId.intValue())
-                .orElseThrow(() -> new RuntimeException("Premium car not found"));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Premium car not found with ID: " + premiumCarId));
 
         cartRepository.deleteByUserAndPremiumCar(user, premiumCar);
     }
 
-    // ✅ GET USER CART
     @Override
     public List<CartResponseDTO> getUserCart(Integer userId) {
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("User not found with ID: " + userId));
 
         return cartRepository.findByUser(user)
                 .stream()

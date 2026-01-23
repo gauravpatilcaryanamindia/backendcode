@@ -2,6 +2,9 @@ package com.spring.jwt.cart.dto;
 
 import lombok.*;
 
+
+import lombok.*;
+
 import java.time.LocalDateTime;
 
 @Getter
@@ -26,4 +29,8 @@ public class CartResponseDTO {
     private Double totalPrice;
 
     private LocalDateTime createdAt;
+
+    private String status;
+
+    private String message;
 }

@@ -1,12 +1,13 @@
 package com.spring.jwt.cart.controller;
-
 import com.spring.jwt.cart.dto.CartRequestDTO;
 import com.spring.jwt.cart.dto.CartResponseDTO;
 import com.spring.jwt.cart.dto.CartUpdateDTO;
 import com.spring.jwt.cart.service.CartService;
+import com.spring.jwt.dto.ResponseDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,38 +19,53 @@ public class CartController {
 
     private final CartService cartService;
 
-    // ✅ ADD PREMIUM CAR TO CART
+    // ✅ STORY 3: ADD PREMIUM CAR TO CART (OWNER ONLY)
+    //@PreAuthorize("@securityUtil.getCurrentUserId() == #userId")
     @PostMapping("/add/{userId}")
-    public ResponseEntity<CartResponseDTO> addToCart(
+    public ResponseEntity<ResponseDto> addToCart(
             @PathVariable Integer userId,
             @RequestBody @Valid CartRequestDTO dto
     ) {
-        return ResponseEntity.ok(cartService.addToCart(userId, dto));
+        CartResponseDTO response = cartService.addToCart(userId, dto);
+        return ResponseEntity.ok(
+                new ResponseDto("success", "Premium car added to cart", response)
+        );
     }
 
-    // ✅ UPDATE CART
+    // ✅ UPDATE CART (OWNER ONLY)
+    //@PreAuthorize("@securityUtil.getCurrentUserId() == #dto.userId")
     @PutMapping("/update")
-    public ResponseEntity<CartResponseDTO> updateCart(
+    public ResponseEntity<ResponseDto> updateCart(
             @RequestBody @Valid CartUpdateDTO dto
     ) {
-        return ResponseEntity.ok(cartService.updateCart(dto));
+        return ResponseEntity.ok(
+                new ResponseDto("success", "Cart updated successfully",
+                        cartService.updateCart(dto))
+        );
     }
 
-    // ✅ REMOVE FROM CART
+    // ✅ STORY 4: REMOVE PREMIUM CAR FROM CART (OWNER ONLY)
+    //@PreAuthorize("@securityUtil.getCurrentUserId() == #userId")
     @DeleteMapping("/remove/{userId}/{premiumCarId}")
-    public ResponseEntity<String> removeFromCart(
+    public ResponseEntity<ResponseDto> removeFromCart(
             @PathVariable Integer userId,
             @PathVariable Long premiumCarId
     ) {
         cartService.removeFromCart(userId, premiumCarId);
-        return ResponseEntity.ok("Item removed from cart");
+        return ResponseEntity.ok(
+                new ResponseDto("success", "Premium car removed from cart")
+        );
     }
 
-    // ✅ GET USER CART
+    // ✅ GET USER CART (OWNER ONLY)
+    //@PreAuthorize("@securityUtil.getCurrentUserId() == #userId")
     @GetMapping("/{userId}")
-    public ResponseEntity<List<CartResponseDTO>> getUserCart(
+    public ResponseEntity<ResponseDto> getUserCart(
             @PathVariable Integer userId
     ) {
-        return ResponseEntity.ok(cartService.getUserCart(userId));
+        List<CartResponseDTO> cart = cartService.getUserCart(userId);
+        return ResponseEntity.ok(
+                new ResponseDto("success", "User cart fetched successfully", cart)
+        );
     }
 }
