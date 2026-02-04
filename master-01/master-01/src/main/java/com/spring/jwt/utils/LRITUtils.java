@@ -28,6 +28,7 @@ public class LRITUtils implements CommandLineRunner {
         rolesToAdd.add("DEALER");
         rolesToAdd.add("INSPECTOR");
         rolesToAdd.add("SALESPERSON");
+        rolesToAdd.add("SERVICE_STATION");
 
         List<String> existingRoles = entityManager.createQuery("SELECT r.name FROM Role r", String.class).getResultList();
 

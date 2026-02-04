@@ -10,6 +10,7 @@ import com.spring.jwt.exception.*;
 import com.spring.jwt.repository.RoleRepository;
 import com.spring.jwt.repository.UserProfileRepository;
 import com.spring.jwt.repository.UserRepository;
+import com.spring.jwt.serviceStation.entity.ServiceStation;
 import com.spring.jwt.utils.BaseResponseDTO;
 import jakarta.mail.*;
 import jakarta.mail.internet.InternetAddress;
@@ -138,6 +139,33 @@ public class UserServiceImpl implements UserService {
             salesPerson.setStatus(false);
             user.setSalesPerson(salesPerson);
             salesPerson.setUser(user);
+        }else if (role.getName().equals("SERVICE_STATION")) {
+
+            Authentication authentication =
+                    SecurityContextHolder.getContext().getAuthentication();
+
+            if (authentication.getAuthorities().stream().anyMatch(authority ->
+                    authority.getAuthority().equals("ADMIN") ||
+                            authority.getAuthority().equals("SALESPERSON"))) {
+
+                ServiceStation serviceStation = new ServiceStation();
+
+                serviceStation.setStationName(registerDto.getShopName());
+                serviceStation.setFirstName(registerDto.getFirstName());
+                serviceStation.setLastName(registerDto.getLastName());
+                serviceStation.setMobileNo(registerDto.getMobileNo());
+                serviceStation.setAddress(registerDto.getAddress());
+                serviceStation.setCity(registerDto.getCity());
+                serviceStation.setArea(registerDto.getArea());
+                serviceStation.setStatus(false);
+
+                user.setServiceStation(serviceStation);
+                serviceStation.setUser(user);
+
+            } else {
+                throw new UnauthorizedException(
+                        "User do not have the authority of ADMIN or SALESPERSON to create SERVICE STATION account.");
+            }
         }
         return user;
     }

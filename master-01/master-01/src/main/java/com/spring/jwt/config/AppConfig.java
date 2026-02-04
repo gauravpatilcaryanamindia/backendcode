@@ -145,6 +145,8 @@ public class AppConfig {
                 .requestMatchers("/enquiry/**").permitAll()
                 .requestMatchers("/premiumBrands/**").permitAll()
                 .requestMatchers("/PremiumCarFilter/**").permitAll()
+                .requestMatchers("/api/service-station", "/api/service-station/create", "/api/service-station/getById/*", "/api/service-station/getAll", "/api/service-station/updateStation/*", "/api/service-station/deleteStation/*", "/api/service-station/documents/*/verify").hasAuthority("ADMIN")
+                .requestMatchers("/api/service-station/me", "/api/service-station/update-me", "/api/service-station/documents/**").hasAuthority("SERVICE_STATION")
                 .anyRequest().authenticated()
                 .and()
                 .authenticationManager(manager)
