@@ -12,4 +12,6 @@ public interface ServiceStationRepository
     Optional<ServiceStation> findByUserId(Integer userId);
 
     List<ServiceStation> findByStatusTrue();
+
+
 }

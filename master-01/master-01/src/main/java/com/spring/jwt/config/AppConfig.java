@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -147,6 +148,8 @@ public class AppConfig {
                 .requestMatchers("/PremiumCarFilter/**").permitAll()
                 .requestMatchers("/api/service-station", "/api/service-station/create", "/api/service-station/getById/*", "/api/service-station/getAll", "/api/service-station/updateStation/*", "/api/service-station/deleteStation/*", "/api/service-station/documents/*/verify").hasAuthority("ADMIN")
                 .requestMatchers("/api/service-station/me", "/api/service-station/update-me", "/api/service-station/documents/**").hasAuthority("SERVICE_STATION")
+                .requestMatchers("/service-stations/{stationId}/bookings", "/service-stations/{stationId}/getAll", "/service-stations/{stationId}/**").hasAnyAuthority("SERVICE_STATION","ADMIN")
+                .requestMatchers(HttpMethod.POST, "/service-stations/**").hasRole("SERVICE_STATION")
                 .anyRequest().authenticated()
                 .and()
                 .authenticationManager(manager)
