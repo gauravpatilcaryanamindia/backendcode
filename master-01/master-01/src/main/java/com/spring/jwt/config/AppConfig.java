@@ -150,6 +150,7 @@ public class AppConfig {
                 .requestMatchers("/api/service-station/me", "/api/service-station/update-me", "/api/service-station/documents/**").hasAuthority("SERVICE_STATION")
                 .requestMatchers("/service-stations/{stationId}/bookings", "/service-stations/{stationId}/getAll", "/service-stations/{stationId}/**").hasAnyAuthority("SERVICE_STATION","ADMIN")
                 .requestMatchers(HttpMethod.POST, "/service-stations/**").hasRole("SERVICE_STATION")
+                .requestMatchers("/api/service-stations/**").hasAnyAuthority("SERVICE_STATION","ADMIN")
                 .anyRequest().authenticated()
                 .and()
                 .authenticationManager(manager)

@@ -85,12 +85,22 @@ public class ServiceStationBookingServiceImpl
                 .findByIdAndServiceStation_Id(bookingId, stationId)
                 .orElseThrow(() -> new RuntimeException("Booking not found"));
 
+        // Normalize status
+        status = status.toUpperCase();
+
+        // Validate transition
         validateStatusFlow(booking.getServiceStatus(), status);
 
-        booking.setServiceStatus(status.toUpperCase());
+        booking.setServiceStatus(status);
 
-        if ("IN_PROGRESS".equalsIgnoreCase(status)) {
+        //  Set start time only once
+        if ("IN_PROGRESS".equals(status) && booking.getServiceStartTime() == null) {
             booking.setServiceStartTime(LocalDateTime.now());
+        }
+
+        //  Set end time only once
+        if ("COMPLETED".equals(status) && booking.getServiceEndTime() == null) {
+            booking.setServiceEndTime(LocalDateTime.now());
         }
 
         ServiceStationBooking saved = bookingRepository.save(booking);
