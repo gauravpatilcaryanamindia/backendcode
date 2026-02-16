@@ -44,34 +44,55 @@ public class ServiceStationServiceImpl implements ServiceStationService {
 
     @Override
     public ServiceStationResponseDto create(ServiceStationCreateDto dto) {
-        if (userRepository.existsByEmail(dto.getEmail())
-                || userRepository.existsByMobileNo(dto.getMobileNo())) {
+        System.out.println("Creating service station with email: " + dto.getEmail());
+
+        if (userRepository.existsByEmail(dto.getEmail())) {
+            System.out.println("Email already exists: " + dto.getEmail());
             return null;
         }
-        User user = new User();
-        user.setEmail(dto.getEmail());
-        user.setMobileNo(dto.getMobileNo());
-        user.setPassword(passwordEncoder.encode(dto.getPassword()));
-        Role role = roleRepository.findByName("SERVICE_STATION");
-        user.setRoles(Set.of(role));
-        userRepository.save(user);
-        ServiceStation station = new ServiceStation();
-        station.setStationName(dto.getStationName());
-        station.setFirstName(dto.getFirstName());
-        station.setLastName(dto.getLastName());
-        station.setMobileNo(dto.getMobileNo());
-        station.setAddress(dto.getAddress());
-        station.setCity(dto.getCity());
-        station.setArea(dto.getArea());
-        station.setServiceTypes(dto.getServiceTypes());
-        station.setBankName(dto.getBankName());
-        station.setAccountNumber(dto.getAccountNumber());
-        station.setIfscCode(dto.getIfscCode());
-        station.setStatus(true);
-        station.setUser(user);
-        updateProfileStatus(station);
-        stationRepository.save(station);
-        return mapToDto(station);
+        if (userRepository.existsByMobileNo(dto.getMobileNo())) {
+            System.out.println("Mobile number already exists: " + dto.getMobileNo());
+            return null;
+        }
+
+        try {
+            User user = new User();
+            user.setEmail(dto.getEmail());
+            user.setMobileNo(dto.getMobileNo());
+            user.setPassword(passwordEncoder.encode(dto.getPassword()));
+            Role role = roleRepository.findByName("SERVICE_STATION");
+            if (role == null) {
+                System.out.println("SERVICE_STATION role not found!");
+                return null;
+            }
+            user.setRoles(Set.of(role));
+            userRepository.save(user);
+            System.out.println("User created successfully: " + user.getId());
+
+            ServiceStation station = new ServiceStation();
+            station.setStationName(dto.getStationName());
+            station.setFirstName(dto.getFirstName());
+            station.setLastName(dto.getLastName());
+            station.setMobileNo(dto.getMobileNo());
+            station.setAddress(dto.getAddress());
+            station.setCity(dto.getCity());
+            station.setArea(dto.getArea());
+            station.setServiceTypes(dto.getServiceTypes());
+            station.setBankName(dto.getBankName());
+            station.setAccountNumber(dto.getAccountNumber());
+            station.setIfscCode(dto.getIfscCode());
+            station.setStatus(true);
+            station.setUser(user);
+            updateProfileStatus(station);
+            stationRepository.save(station);
+            System.out.println("Service station created successfully: " + station.getId());
+
+            return mapToDto(station);
+        } catch (Exception e) {
+            System.out.println("Error creating service station: " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
     }
 
     @Override
@@ -85,9 +106,13 @@ public class ServiceStationServiceImpl implements ServiceStationService {
 
     @Override
     public List<ServiceStationResponseDto> getAll() {
-        List<ServiceStation> list = stationRepository.findByStatusTrue();
+        // For debugging: return all stations regardless of status
+        List<ServiceStation> list = stationRepository.findAll();
+        System.out.println("Total stations found in database: " + list.size());
+
         List<ServiceStationResponseDto> response = new ArrayList<>();
         for (ServiceStation station : list) {
+            System.out.println("Station: " + station.getStationName() + ", Status: " + station.getStatus());
             response.add(mapToDto(station));
         }
         return response;
